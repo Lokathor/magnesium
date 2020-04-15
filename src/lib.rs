@@ -4,19 +4,21 @@
 
 //! This crate provides very a simplistic iterator for stepping over XML data.
 //!
-//! The processing is quite simplistic. The full XML spec probably isn't
-//! followed. It doesn't decode any of the special character replacements for
-//! you.
+//! Only requires `core`, doesn't allocate, doesn't use `unsafe`.
 //!
-//! The crate is intended for when you have a fairly basic XML file and you just
-//! need to walk through and scrape the data. For example, when parsing
+//! The processing is quite simplistic, and the iterator will simply fail and
+//! end the iteration if there's a problem. This doesn't do any special
+//! character replacement for you.
+//!
+//! The crate is intended for when you have a fairly basic XML file that is
+//! assumed to be "non-hostile", and you just need to walk through and scrape
+//! the data. For example, when parsing
 //! [`gl.xml`](https://github.com/KhronosGroup/OpenGL-Registry/blob/master/xml/gl.xml)
 //! or
 //! [`vk.xml`](https://github.com/KhronosGroup/Vulkan-Docs/blob/master/xml/vk.xml).
 //!
-//! Only requires `core`, doesn't allocate, doesn't use `unsafe`.
-//!
 //! ## Example Usage
+//!
 //! ```
 //! use magnesium::*;
 //!

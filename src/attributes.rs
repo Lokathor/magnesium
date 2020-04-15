@@ -1,10 +1,12 @@
 use super::*;
 
-/// An attribute within a Start or Empty tag's data.
+/// The output of a [`TagAttributeIterator`].
 ///
-/// Tag attributes are key-value pairs. Each key should only appear once in a
-/// given tag. The attribute order shouldn't be significant, but that doesn't
-/// mean that all the attributes always appear in a specific order.
+/// Attributes within an XML tag are key-value pairs. Only `Start` and `Empty`
+/// tags have attributes.
+///
+/// Each key is expected to only appear once in a given tag. The order of the
+/// keys is not usually significant.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 #[allow(missing_docs)]
 pub struct TagAttribute<'s> {
@@ -12,7 +14,7 @@ pub struct TagAttribute<'s> {
   pub value: &'s str,
 }
 
-/// Iterator to walk through a tag's attribute string.
+/// Iterator to walk through a `Start` or `Empty` tag's attribute string.
 ///
 /// Supports both `'` and `"` quoting around the attribute values.
 ///

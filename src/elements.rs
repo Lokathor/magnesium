@@ -5,25 +5,29 @@ use super::*;
 pub enum XmlElement<'s> {
   /// An opening tag with a name and some attributes.
   ///
+  /// Eg: `<books attr1="attr val1">`
+  ///
   /// If the XML is well formed, then there will be an EndTag with a matching
   /// name later on. In between there can be any number of sub-entries.
   StartTag {
     /// Name of this tag.
     name: &'s str,
-    /// Attribute string.
-    ///
-    /// Parse this with a
+    /// Attribute string, parse this with a
     /// [`TagAttributeIterator`](crate::TagAttributeIterator).
     attrs: &'s str,
   },
 
   /// Closes the `StartTag` of the same name.
+  ///
+  /// Eg: `</books>`
   EndTag {
     /// Name of the tag being closed.
     name: &'s str,
   },
 
-  /// An "empty" tag has no inner content, it opens and immediate closes.
+  /// An "empty" tag has no inner content, just attributes.
+  ///
+  /// Eg: `<enum name="GRAPHICS_POLYGON value="0x0001"/>`
   EmptyTag {
     /// The tag's name.
     name: &'s str,
@@ -34,55 +38,44 @@ pub enum XmlElement<'s> {
     attrs: &'s str,
   },
 
-  /// Text between tags, including Cdata entries.
+  /// Text between tags.
+  ///
+  /// If there's a "CDATA" entry it is parsed as a Text element.
   Text(&'s str),
 
-  /// Comments between tags in `<!--` and `-->`.
+  /// Text between `<!--` and `-->`.
   Comment(&'s str),
 }
 
 /// An iterator to walk the elements of some XML data.
 ///
-/// This gives you basically all the element entries. It's highly likely that
-/// you want to chain a call to [`filter_map`](core::iter::Iterator::filter_map)
-/// onto this iterator for simplified processing. The crate provides the
-/// [`skip_empty_text_elements`] and [`skip_comments`] filters for you.
+/// This gives you _all_ the elements processed, even a bunch of empty
+/// `XmlElement::Text` elements and `XmlElement::Comment` elements that you
+/// might not care about. You can use
+/// [`filter_map`](core::iter::Iterator::filter_map) to help keep these away
+/// from your main processing code. The crate provides two `filter_map`
+/// compatible functions for you: [`skip_empty_text_elements`] and
+/// [`skip_comments`] filters for you.
 ///
-/// The parsing is a little simplistic, and if the iterator gets confused by bad
+/// The parsing is a little simplistic, and if the iterator gets confused by the
 /// input it will just end the iteration.
 #[derive(Debug, Clone, Default)]
 pub struct ElementIterator<'s> {
   // Note: this should *initially* be trimmed to the start of the top level XML
-  // tag. From there, any leading whitespace we see is part of a Text element.
+  // tag. From there, any other leading whitespace we see is part of a Text
+  // element.
   text: &'s str,
 }
 impl<'s> ElementIterator<'s> {
-  /// Makes a new iterator over the elements.
+  /// Makes a new iterator.
   ///
   /// This works both with and without the initial XML declaration in the
   /// string. The declaration won't be in the iteration either way.
-  ///
-  /// ## Panics
-  /// * This calls [`try_new`](ElementIterator::try_new) and then unwraps.
   #[inline]
   #[must_use]
-  pub fn new(words: &'s str) -> Self {
-    Self::try_new(words).unwrap()
-  }
-
-  /// Makes a new iterator over the elements.
-  ///
-  /// This works both with and without the initial XML declaration in the
-  /// string. The declaration won't be in the iteration either way.
-  ///
-  /// ## Failure
-  /// * If the text has an XML declaration that opens but doesn't close, this
-  ///   fails.
-  #[inline]
-  #[must_use]
-  pub fn try_new(text: &'s str) -> Option<Self> {
-    let text = trim_xml_declaration(text)?;
-    Some(Self { text })
+  pub fn new(text: &'s str) -> Self {
+    let text = trim_xml_declaration(text).unwrap_or_default();
+    Self { text }
   }
 }
 impl<'s> Iterator for ElementIterator<'s> {
@@ -146,6 +139,14 @@ impl<'s> core::iter::FusedIterator for ElementIterator<'s> {}
 /// For use with [`filter_map`](core::iter::Iterator::filter_map) calls on
 /// an [`ElementIterator`].
 ///
+/// ```rust
+/// # use magnesium::*;
+/// let iter = ElementIterator::new("").filter_map(skip_empty_text_elements);
+/// for element in iter {
+///   println!("{:?}", element);
+/// }
+/// ```
+///
 /// ## Failure
 /// * If the input is `XmlElement::Text` and the contained text becomes an empty
 ///   string after calling [`trim`](str::trim).
@@ -170,6 +171,14 @@ pub fn skip_empty_text_elements<'s>(
 ///
 /// For use with [`filter_map`](core::iter::Iterator::filter_map) calls on
 /// an [`ElementIterator`].
+///
+/// ```rust
+/// # use magnesium::*;
+/// let iter = ElementIterator::new("").filter_map(skip_comments);
+/// for element in iter {
+///   println!("{:?}", element);
+/// }
+/// ```
 ///
 /// ## Failure
 /// * If the input is `XmlElement::Comment`.
