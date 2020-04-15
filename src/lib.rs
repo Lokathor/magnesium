@@ -1,5 +1,6 @@
 #![no_std]
 #![warn(missing_docs)]
+#![forbid(unsafe_code)]
 
 //! This crate provides very a simplistic iterator for stepping over XML data.
 //!
