@@ -14,7 +14,7 @@
 //! or
 //! [`vk.xml`](https://github.com/KhronosGroup/Vulkan-Docs/blob/master/xml/vk.xml).
 //!
-//! Only requires `core`, doesn't allocate.
+//! Only requires `core`, doesn't allocate, doesn't use `unsafe`.
 //!
 //! ## Example Usage
 //! ```
