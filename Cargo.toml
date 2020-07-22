@@ -1,6 +1,6 @@
 [package]
 name = "magnesium"
-version = "1.0.0-alpha.0"
+version = "1.0.0"
 description = "A minimal XML iterator"
 repository = "https://github.com/Lokathor/magnesium"
 readme = "README.md"
