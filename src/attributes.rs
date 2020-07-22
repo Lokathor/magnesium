@@ -7,7 +7,7 @@ use super::*;
 ///
 /// Each key is expected to only appear once in a given tag. The order of the
 /// keys is not usually significant.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(missing_docs)]
 pub struct TagAttribute<'s> {
   pub key: &'s str,
