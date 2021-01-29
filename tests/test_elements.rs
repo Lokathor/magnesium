@@ -221,3 +221,15 @@ fn test_skipping_comments_parsing() {
   assert_eq!(iter.next(), Some(XmlElement::EndTag { name: "registry" }));
   assert_eq!(iter.next(), None);
 }
+
+#[test]
+fn test_empty_tag_no_attrs() {
+  let xml = "<apientry/>";
+
+  let mut iter = ElementIterator::new(xml);
+
+  assert_eq!(
+    iter.next(),
+    Some(XmlElement::EmptyTag { name: "apientry", attrs: "" })
+  );
+}

@@ -120,8 +120,8 @@ impl<'s> Iterator for ElementIterator<'s> {
         };
         self.text = rest;
         if tag_text.ends_with('/') {
-          let (name, attrs) =
-            break_on_first_char(tag_text, ' ').unwrap_or((tag_text, "/"));
+          let (name, attrs) = break_on_first_char(tag_text, ' ')
+            .unwrap_or((&tag_text[..tag_text.len() - 1], "/"));
           let attrs = &attrs[..attrs.len() - 1];
           return Some(XmlElement::EmptyTag { name, attrs });
         } else if tag_text.starts_with('/') {

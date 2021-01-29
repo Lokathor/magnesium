@@ -44,6 +44,53 @@ pub use elements::*;
 mod attributes;
 pub use attributes::*;
 
+#[cfg(feature="alloc")]
+extern crate alloc;
+#[cfg(feature="alloc")]
+use alloc::string::String;
+
+/// Converts an escaped string to the intended text.
+///
+/// ```rust
+/// # use magnesium::revert_xml_encoding;
+/// assert_eq!("abc<", &revert_xml_encoding("abc&lt;"));
+/// assert_eq!("1>2", &revert_xml_encoding("1&gt;2"));
+/// assert_eq!("a&b", &revert_xml_encoding("a&amp;b"));
+/// ```
+/// ## Panics
+/// If an illegal '&' sequence is present.
+#[cfg(feature="alloc")]
+pub fn revert_xml_encoding(text: &str) -> String {
+  let mut out = String::with_capacity(text.as_bytes().len());
+  let mut chars = text.chars();
+  while let Some(c) = chars.next() {
+    if c != '&' {
+      out.push(c);
+    } else {
+      match chars.next().unwrap() {
+        'l' => {
+          assert_eq!(chars.next().unwrap(), 't');
+          assert_eq!(chars.next().unwrap(), ';');
+          out.push('<');
+        }
+        'g' => {
+          assert_eq!(chars.next().unwrap(), 't');
+          assert_eq!(chars.next().unwrap(), ';');
+          out.push('>');
+        }
+        'a' => {
+          assert_eq!(chars.next().unwrap(), 'm');
+          assert_eq!(chars.next().unwrap(), 'p');
+          assert_eq!(chars.next().unwrap(), ';');
+          out.push('&');
+        }
+        other => panic!("unknown '&' char: {}", other),
+      }
+    }
+  }
+  out
+}
+
 /// Break the input around the first `c` found.
 ///
 /// Returns `(before, after)`.
