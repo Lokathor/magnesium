@@ -46,6 +46,18 @@ pub enum XmlElement<'s> {
   /// Text between `<!--` and `-->`.
   Comment(&'s str),
 }
+impl<'s> XmlElement<'s> {
+  /// Unwraps a `Text` variant into the inner `&str` value.
+  ///
+  /// ## Panics
+  /// If the variant isn't `Text` this will panic.
+  pub fn unwrap_text(&self) -> &'s str {
+    match self {
+      Self::Text(t) => t,
+      _ => panic!("unwrap_text on non-Text: {:?}", self),
+    }
+  }
+}
 
 /// An iterator to walk the elements of some XML data.
 ///
