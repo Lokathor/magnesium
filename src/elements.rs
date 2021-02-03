@@ -5,7 +5,7 @@ use super::*;
 pub enum XmlElement<'s> {
   /// An opening tag with a name and some attributes.
   ///
-  /// Eg: `<books attr1="attr val1">`
+  /// Eg: `<books attr1="val1">`
   ///
   /// If the XML is well formed, then there will be an EndTag with a matching
   /// name later on. In between there can be any number of sub-entries.
@@ -47,6 +47,28 @@ pub enum XmlElement<'s> {
   Comment(&'s str),
 }
 impl<'s> XmlElement<'s> {
+  /// Unwraps a `StartTag` variant into the inner `(name, attrs)` pair.
+  ///
+  /// ## Panics
+  /// If the variant isn't `StartTag` this will panic.
+  pub fn unwrap_start_tag(&self) -> (&'s str, &'s str) {
+    match self {
+      Self::StartTag { name, attrs } => (name, attrs),
+      _ => panic!("unwrap_start_tag on non-StartTag: {:?}", self),
+    }
+  }
+
+  /// Unwraps an `EndTag` variant into the inner `name`.
+  ///
+  /// ## Panics
+  /// If the variant isn't `EndTag` this will panic.
+  pub fn unwrap_end_tag(&self) -> &'s str {
+    match self {
+      Self::EndTag { name } => name,
+      _ => panic!("unwrap_end_tag on non-EndTag: {:?}", self),
+    }
+  }
+
   /// Unwraps a `Text` variant into the inner `&str` value.
   ///
   /// ## Panics
@@ -55,6 +77,17 @@ impl<'s> XmlElement<'s> {
     match self {
       Self::Text(t) => t,
       _ => panic!("unwrap_text on non-Text: {:?}", self),
+    }
+  }
+
+  /// Unwraps a `Comment` variant into the inner `&str` value.
+  ///
+  /// ## Panics
+  /// If the variant isn't `Comment` this will panic.
+  pub fn unwrap_comment(&self) -> &'s str {
+    match self {
+      Self::Comment(t) => t,
+      _ => panic!("unwrap_comment on non-Comment: {:?}", self),
     }
   }
 }
@@ -200,6 +233,27 @@ pub fn skip_comments<'s>(el: XmlElement<'s>) -> Option<XmlElement<'s>> {
   match el {
     XmlElement::Comment(_) => None,
     other => Some(other),
+  }
+}
+
+/// Applies `str::trim` to a `Text` element. No effect otherwise.
+///
+/// For use with [`map`](core::iter::Iterator::map) calls on
+/// an [`ElementIterator`].
+///
+/// ```rust
+/// # use magnesium::*;
+/// let iter = ElementIterator::new("<a>  z</a>").map(trim_text);
+/// for element in iter {
+///   println!("{:?}", element);
+/// }
+/// ```
+#[inline]
+#[must_use]
+pub fn trim_text<'s>(el: XmlElement<'s>) -> XmlElement<'s> {
+  match el {
+    XmlElement::Text(t) => XmlElement::Text(t.trim()),
+    other => other,
   }
 }
 
