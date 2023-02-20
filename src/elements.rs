@@ -129,6 +129,7 @@ impl<'s> Iterator for ElementIterator<'s> {
   #[inline]
   #[must_use]
   fn next(&mut self) -> Option<Self::Item> {
+    #[allow(clippy::never_loop)]
     'clear_and_return_none: loop {
       if self.text.is_empty() {
         return None;
@@ -152,13 +153,13 @@ impl<'s> Iterator for ElementIterator<'s> {
           None => break 'clear_and_return_none,
         };
         self.text = rest;
-        if tag_text.ends_with('/') {
-          let (name, attrs) = break_on_first_char(tag_text, ' ')
-            .unwrap_or((&tag_text[..tag_text.len() - 1], "/"));
+        if let Some(stripped) = tag_text.strip_suffix('/') {
+          let (name, attrs) =
+            break_on_first_char(tag_text, ' ').unwrap_or((stripped, "/"));
           let attrs = &attrs[..attrs.len() - 1];
           return Some(XmlElement::EmptyTag { name, attrs });
-        } else if tag_text.starts_with('/') {
-          return Some(XmlElement::EndTag { name: &tag_text[1..] });
+        } else if let Some(name) = tag_text.strip_prefix('/') {
+          return Some(XmlElement::EndTag { name });
         } else {
           let (name, attrs) =
             break_on_first_char(tag_text, ' ').unwrap_or((tag_text, ""));
@@ -197,9 +198,7 @@ impl<'s> core::iter::FusedIterator for ElementIterator<'s> {}
 ///   string after calling [`trim`](str::trim).
 #[inline]
 #[must_use]
-pub fn skip_empty_text_elements<'s>(
-  el: XmlElement<'s>,
-) -> Option<XmlElement<'s>> {
+pub fn skip_empty_text_elements(el: XmlElement<'_>) -> Option<XmlElement<'_>> {
   match el {
     XmlElement::Text(t) => {
       if t.trim().is_empty() {
@@ -229,7 +228,7 @@ pub fn skip_empty_text_elements<'s>(
 /// * If the input is `XmlElement::Comment`.
 #[inline]
 #[must_use]
-pub fn skip_comments<'s>(el: XmlElement<'s>) -> Option<XmlElement<'s>> {
+pub fn skip_comments(el: XmlElement<'_>) -> Option<XmlElement<'_>> {
   match el {
     XmlElement::Comment(_) => None,
     other => Some(other),
@@ -250,7 +249,7 @@ pub fn skip_comments<'s>(el: XmlElement<'s>) -> Option<XmlElement<'s>> {
 /// ```
 #[inline]
 #[must_use]
-pub fn trim_text<'s>(el: XmlElement<'s>) -> XmlElement<'s> {
+pub fn trim_text(el: XmlElement<'_>) -> XmlElement<'_> {
   match el {
     XmlElement::Text(t) => XmlElement::Text(t.trim()),
     other => other,

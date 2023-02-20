@@ -40,6 +40,7 @@ impl<'s> Iterator for TagAttributeIterator<'s> {
     if self.attrs.is_empty() {
       return None;
     }
+    #[allow(clippy::never_loop)]
     'clear_and_return_none: loop {
       // break on `=`
       let (key, rest) = match break_on_first_char(self.attrs, '=') {
@@ -48,7 +49,7 @@ impl<'s> Iterator for TagAttributeIterator<'s> {
       };
       self.attrs = rest;
       // support both `"` and `'` since it's easy to do
-      let quote_marker = match self.attrs.chars().nth(0) {
+      let quote_marker = match self.attrs.chars().next() {
         Some(q) if q == '\'' || q == '\"' => {
           self.attrs = &self.attrs[1..];
           q
