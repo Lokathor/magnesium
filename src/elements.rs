@@ -51,6 +51,8 @@ impl<'s> XmlElement<'s> {
   ///
   /// ## Panics
   /// If the variant isn't `StartTag` this will panic.
+  #[must_use]
+  #[track_caller]
   pub fn unwrap_start_tag(&self) -> (&'s str, &'s str) {
     match self {
       Self::StartTag { name, attrs } => (name, attrs),
@@ -62,6 +64,8 @@ impl<'s> XmlElement<'s> {
   ///
   /// ## Panics
   /// If the variant isn't `EndTag` this will panic.
+  #[must_use]
+  #[track_caller]
   pub fn unwrap_end_tag(&self) -> &'s str {
     match self {
       Self::EndTag { name } => name,
@@ -73,6 +77,8 @@ impl<'s> XmlElement<'s> {
   ///
   /// ## Panics
   /// If the variant isn't `Text` this will panic.
+  #[must_use]
+  #[track_caller]
   pub fn unwrap_text(&self) -> &'s str {
     match self {
       Self::Text(t) => t,
@@ -84,6 +90,8 @@ impl<'s> XmlElement<'s> {
   ///
   /// ## Panics
   /// If the variant isn't `Comment` this will panic.
+  #[must_use]
+  #[track_caller]
   pub fn unwrap_comment(&self) -> &'s str {
     match self {
       Self::Comment(t) => t,
