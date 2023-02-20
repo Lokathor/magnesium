@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1
+
+* Added `must_use` and `track_caller` to the unwrapper functions.
+* Applied some clippy suggestions.
+
 ## 1.2
 
 * Added `unwrap_start_tag`, `unwrap_end_tag`, `unwrap_comment` to `XmlElement`.
