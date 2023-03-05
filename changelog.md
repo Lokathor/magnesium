@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3
+
+* Added `TagAttributeIterator::find_by_key`
+
 ## 1.2.1
 
 * Added `must_use` and `track_caller` to the unwrapper functions.

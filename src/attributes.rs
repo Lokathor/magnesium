@@ -26,8 +26,26 @@ pub struct TagAttributeIterator<'s> {
 }
 impl<'s> TagAttributeIterator<'s> {
   /// Makes a new iterator over the attribute string.
+  #[inline]
+  #[must_use]
   pub fn new(attrs: &'s str) -> Self {
     Self { attrs: attrs.trim() }
+  }
+
+  /// Gets the `value` of the `key` given, if the key is present.
+  ///
+  /// ```rust
+  /// # use magnesium::TagAttributeIterator;
+  /// let attrs = r#"namespace="Graphics" group="Polygon""#;
+  /// let iter = TagAttributeIterator::new(attrs);
+  /// assert_eq!(iter.find_by_key("namespace"), Some("Graphics"));
+  /// assert_eq!(iter.find_by_key("ferris"), None);
+  /// assert_eq!(iter.find_by_key("group"), Some("Polygon"));
+  /// ```
+  #[inline]
+  #[must_use]
+  pub fn find_by_key(&self, key: &str) -> Option<&'s str> {
+    self.clone().find(|ta| ta.key == key).map(|ta| ta.value)
   }
 }
 impl<'s> Iterator for TagAttributeIterator<'s> {
